@@ -68,7 +68,7 @@ public class PlotItem {
         _value       = VALUE;
         _description = DESCRIPTION;
         _color       = COLOR;
-        level = -1;
+        level        = -1;
         outgoing     = new LinkedHashMap<>();
         incoming     = new LinkedHashMap<>();
         listeners    = new CopyOnWriteArrayList<>();
