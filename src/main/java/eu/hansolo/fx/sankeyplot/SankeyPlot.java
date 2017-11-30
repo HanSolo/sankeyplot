@@ -22,6 +22,8 @@ import eu.hansolo.fx.sankeyplot.tools.Point;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -72,6 +74,7 @@ public class SankeyPlot extends Region {
     private static final Color                            DEFAULT_ITEM_COLOR   = Color.rgb(164, 164, 164);
     private static final int                              DEFAULT_ITEM_WIDTH   = 20;
     private static final int                              DEFAULT_NODE_GAP     = 20;
+    private static final double                           DEFAULT_OPACITY      = 0.55;
     private              double                           size;
     private              double                           width;
     private              double                           height;
@@ -106,6 +109,8 @@ public class SankeyPlot extends Region {
     private              BooleanProperty                  useItemColor;
     private              Color                            _itemColor;
     private              ObjectProperty<Color>            itemColor;
+    private              double                           _connectionOpacity;
+    private              DoubleProperty                   connectionOpacity;
 
 
     // ******************** Constructors **************************************
@@ -140,6 +145,7 @@ public class SankeyPlot extends Region {
         _showFlowDirection = false;
         _useItemColor      = true;
         _itemColor         = DEFAULT_ITEM_COLOR;
+        _connectionOpacity = DEFAULT_OPACITY;
 
         initGraphics();
         registerListeners();
@@ -435,6 +441,29 @@ public class SankeyPlot extends Region {
         return itemColor;
     }
 
+    public double getConnectionOpacity() { return null == connectionOpacity ? _connectionOpacity : connectionOpacity.get(); }
+    public void setConnectionOpacity(final double OPACITY) {
+        if (null == connectionOpacity) {
+            _connectionOpacity = Helper.clamp(0.1, 1.0, OPACITY);
+            redraw();
+        } else {
+            connectionOpacity.set(OPACITY);
+        }
+    }
+    public DoubleProperty connectionOpacityProperty() {
+        if (null == connectionOpacity) {
+            connectionOpacity = new DoublePropertyBase(_connectionOpacity) {
+                @Override protected void invalidated() {
+                    set(Helper.clamp(0.1, 1.0, get()));
+                    redraw();
+                }
+                @Override public Object getBean() { return SankeyPlot.this; }
+                @Override public String getName() { return "connectionOpacity"; }
+            };
+        }
+        return connectionOpacity;
+    }
+
     public List<PlotItem> getItemsWithOnlyOutgoing() {
         //return getItems().stream().filter(PlotItem::hasOutgoing).filter(not(PlotItem::hasIncoming)).collect(Collectors.toList());
         return getItems().stream().filter(item -> item.hasOutgoing() && !item.hasIncoming()).collect(Collectors.toList());
@@ -470,6 +499,9 @@ public class SankeyPlot extends Region {
                 itemsPerLevel.get(level).add(new PlotItemData(item));
             }
         });
+
+        // Move items with no incoming streams to correct level
+
 
         // Reverse items in at each level
         itemsPerLevel.forEach((level, items) -> Collections.reverse(items));
@@ -550,6 +582,7 @@ public class SankeyPlot extends Region {
         Color   textColor            = getTextColor();
         boolean showFlowDirection    = getShowFlowDirection();
         double  showDirectionOffsetX = size * 0.01875;
+        double  connectionOpacity    = getConnectionOpacity();
 
         // Draw bezier curves between items
         for (int level = minLevel ; level <= maxLevel ; level++) {
@@ -591,8 +624,8 @@ public class SankeyPlot extends Region {
                         } else {
                             ctx.setFill(new LinearGradient(0, 0, 1, 0,
                                                            true, CycleMethod.NO_CYCLE,
-                                                           new Stop(0, Helper.getColorWithOpacity(item.getColor(), 0.55)),
-                                                           new Stop(1, Helper.getColorWithOpacity(outgoingItem.getColor(), 0.55))));
+                                                           new Stop(0, Helper.getColorWithOpacity(item.getColor(), connectionOpacity)),
+                                                           new Stop(1, Helper.getColorWithOpacity(outgoingItem.getColor(), connectionOpacity))));
                         }
 
                         // Draw the bezier curve

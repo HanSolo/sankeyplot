@@ -112,6 +112,11 @@ public class SankeyPlotBuilder<B extends SankeyPlotBuilder<B>> {
         return (B)this;
     }
 
+    public final B connectionOpacity(final double OPACITY) {
+        properties.put("connectionOpacity", new SimpleDoubleProperty(OPACITY));
+        return (B)this;
+    }
+
     public final B prefSize(final double WIDTH, final double HEIGHT) {
         properties.put("prefSize", new SimpleObjectProperty<>(new Dimension2D(WIDTH, HEIGHT)));
         return (B)this;
@@ -252,6 +257,8 @@ public class SankeyPlotBuilder<B extends SankeyPlotBuilder<B>> {
                 CONTROL.setUseItemColor(((BooleanProperty) properties.get(key)).get());
             } else if ("itemColor".equals(key)) {
                 CONTROL.setItemColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("connectionOpacity".equals(key)) {
+                CONTROL.setConnectionOpacity(((DoubleProperty) properties.get(key)).get());
             }
         }
         return CONTROL;
