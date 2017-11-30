@@ -500,8 +500,28 @@ public class SankeyPlot extends Region {
             }
         });
 
-        // Move items with no incoming streams to correct level
+        // Get min- and max level
+        minLevel = itemsPerLevel.keySet().stream().mapToInt(Integer::intValue).min().getAsInt();
+        maxLevel = itemsPerLevel.keySet().stream().mapToInt(Integer::intValue).max().getAsInt();
 
+        // Move items with no incoming streams to correct level dependent on level of their outgoing items
+        List<PlotItemData> minLevelItems = itemsPerLevel.get(minLevel);
+        Map<PlotItemData, Integer> itemsToMove = new LinkedHashMap<>();
+        for (PlotItemData plotItemData : minLevelItems) {
+            int minLevelOfOutgoingItems = maxLevel;
+            int maxLevelOfOutgoingItems = minLevel;
+            for(PlotItem plotItem : plotItemData.getPlotItem().getOutgoing().keySet()) {
+                int levelOfItem = plotItem.getLevel();
+                minLevelOfOutgoingItems = Math.min(minLevelOfOutgoingItems, levelOfItem);
+                maxLevelOfOutgoingItems = Math.max(maxLevelOfOutgoingItems, levelOfItem);
+            }
+            if (minLevelOfOutgoingItems > minLevel + 1) { itemsToMove.put(plotItemData, minLevelOfOutgoingItems - 1); }
+        }
+        itemsToMove.forEach((itemData, newLevel) -> {
+            minLevelItems.remove(itemData);
+            //itemsPerLevel.get(newLevel).add(itemData);
+            itemsPerLevel.get(newLevel).add(0, itemData);
+        });
 
         // Reverse items in at each level
         itemsPerLevel.forEach((level, items) -> Collections.reverse(items));
@@ -520,8 +540,6 @@ public class SankeyPlot extends Region {
         }
 
         // Get max no of items, max sum of values etc.
-        minLevel = itemsPerLevel.keySet().stream().mapToInt(Integer::intValue).min().getAsInt();
-        maxLevel = itemsPerLevel.keySet().stream().mapToInt(Integer::intValue).max().getAsInt();
         int    maxNoOfItemsAtLevel  = 0;
         double maxSumOfItemsAtLevel = 0;
         for (int i = minLevel ; i <= maxLevel ; i++) {

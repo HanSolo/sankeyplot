@@ -63,6 +63,8 @@ public class Demo extends Application {
         PlotItem usa         = new PlotItem("USA", Colors.ORANGE.get());
         PlotItem canada      = new PlotItem("Canada", Colors.LIGHT_RED.get());
 
+        PlotItem germany     = new PlotItem("Germany", Color.web("#FF48C6"));
+
         PlotItem portugal    = new PlotItem("Portugal", Colors.LIGHT_BLUE.get());
         PlotItem spain       = new PlotItem("Spain", Colors.LIGHT_GREEN.get());
         PlotItem england     = new PlotItem("England", Colors.LIGHT_RED.get());
@@ -94,6 +96,9 @@ public class Demo extends Application {
         usa.addToOutgoing(france, 1);
         usa.addToOutgoing(spain, 1);
         usa.addToOutgoing(england, 5);
+
+        germany.addToOutgoing(southAfrica, 5);
+
         portugal.addToOutgoing(angola, 2);
         portugal.addToOutgoing(senegal, 1);
         portugal.addToOutgoing(morocco, 1);
@@ -129,6 +134,7 @@ public class Demo extends Application {
         sankeyPlot = SankeyPlotBuilder.create()
                                       .prefSize(600, 400)
                                       .items(brazil, mexico, usa, canada,
+                                             germany,
                                              portugal, spain, england, france,
                                              southAfrica, angola, morocco, senegal, mali,
                                              china, japan, india)
